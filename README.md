@@ -4,7 +4,7 @@
 
 # Install
 
-1. ```cordova plugin add cordova-plugin-jb-wechat  --variable wechatappid=YOUR_WECHAT_APPID```, or using [plugman](https://npmjs.org/package/plugman), [phonegap](https://npmjs.org/package/phonegap), [ionic](http://ionicframework.com/)
+1. ```cordova plugin add cordova-plugin-yun-wechat  --variable wechatappid=YOUR_WECHAT_APPID```
 
 2. ```cordova build ios``` or ```cordova build android```
 
