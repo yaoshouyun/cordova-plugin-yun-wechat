@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-yun-wechat",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cordova wechat Plugin",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,12 +22,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yaoshouyun/cordova-plugin-calllistener.git"
+    "url": "git+https://github.com/yaoshouyun/cordova-plugin-yun-wechat.git"
   },
   "author": "yaoshouyun",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/yaoshouyun/cordova-plugin-calllistener/issues"
+    "url": "https://github.com/yaoshouyun/cordova-plugin-yun-wechat/issues"
   },
-  "homepage": "https://github.com/yaoshouyun/cordova-plugin-calllistener#readme"
+  "homepage": "https://github.com/yaoshouyun/cordova-plugin-yun-wechat#readme"
 }
