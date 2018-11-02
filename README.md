@@ -119,7 +119,6 @@ Wechat.chooseInvoiceFromWX(data,function(data){
 ```
 
 # FAQ
-
-See [FAQ](https://github.com/xu-li/cordova-plugin-wechat/wiki/FAQ).
-See [FAQ](https://github.com/XiaoyuZheng666/WechatPlugin/wiki/FAQ).
+# https://github.com/xu-li/cordova-plugin-wechat
+# https://github.com/XiaoyuZheng666/WechatPlugin
 
