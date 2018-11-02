@@ -40,6 +40,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.tbruyelle.rxpermissions.RxPermissions;
+import android.Manifest;
+import rx.functions.Action1;
+import android.annotation.SuppressLint;
+
 public class Wechat extends CordovaPlugin {
 
     public static final String TAG = "Cordova.Plugin.Wechat";
@@ -142,7 +147,6 @@ public class Wechat extends CordovaPlugin {
     @Override
     public boolean execute(String action, CordovaArgs args, CallbackContext callbackContext) throws JSONException {
         Log.d(TAG, String.format("%s is called. Callback ID: %s.", action, callbackContext.getCallbackId()));
-
         if (action.equals("share")) {
             return share(args, callbackContext);
         } else if (action.equals("sendAuthRequest")) {
@@ -158,80 +162,79 @@ public class Wechat extends CordovaPlugin {
         return false;
     }
 
-    protected boolean share(CordovaArgs args, final CallbackContext callbackContext)
-            throws JSONException {
-        final IWXAPI api = getWxAPI(cordova.getActivity());
-
-        // check if installed
-        if (!api.isWXAppInstalled()) {
-            callbackContext.error(ERROR_WECHAT_NOT_INSTALLED);
-            return true;
-        }
-
-        // check if # of arguments is correct
-        final JSONObject params;
-        try {
-            params = args.getJSONObject(0);
-        } catch (JSONException e) {
-            callbackContext.error(ERROR_INVALID_PARAMETERS);
-            return true;
-        }
-
-        final SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = buildTransaction();
-
-        if (params.has(KEY_ARG_SCENE)) {
-            switch (params.getInt(KEY_ARG_SCENE)) {
-                case SCENE_FAVORITE:
-                    req.scene = SendMessageToWX.Req.WXSceneFavorite;
-                    break;
-                case SCENE_TIMELINE:
-                    req.scene = SendMessageToWX.Req.WXSceneTimeline;
-                    break;
-                case SCENE_SESSION:
-                    req.scene = SendMessageToWX.Req.WXSceneSession;
-                    break;
-                default:
-                    req.scene = SendMessageToWX.Req.WXSceneTimeline;
-            }
-        } else {
-            req.scene = SendMessageToWX.Req.WXSceneTimeline;
-        }
-
-        // run in background
-        cordova.getThreadPool().execute(new Runnable() {
-
+    protected boolean share(CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
+        cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    req.message = buildSharingMessage(params);
-                } catch (JSONException e) {
-                    Log.e(TAG, "Failed to build sharing message.", e);
-
-                    // clear callback context
-                    currentCallbackContext = null;
-
-                    // send json exception error
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
-                }
-
-                if (api.sendReq(req)) {
-                    Log.i(TAG, "Message has been sent successfully.");
-                } else {
-                    Log.i(TAG, "Message has been sent unsuccessfully.");
-
-                    // clear callback context
-                    currentCallbackContext = null;
-
-                    // send error
-                    callbackContext.error(ERROR_SEND_REQUEST_FAILED);
-                }
+                new RxPermissions(cordova.getActivity())
+                        .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .subscribe(new Action1<Boolean>() {
+                            @SuppressLint("MissingPermission")
+                            @Override
+                            public void call(Boolean aBoolean) {
+                                if (aBoolean) {
+                                    try {
+                                        final IWXAPI api = getWxAPI(cordova.getActivity());
+                                        // check if installed
+                                        if (!api.isWXAppInstalled()) {
+                                            callbackContext.error(ERROR_WECHAT_NOT_INSTALLED);
+                                            return;
+                                        }
+                                        // check if # of arguments is correct
+                                        final JSONObject params;
+                                        try {
+                                            params = args.getJSONObject(0);
+                                        } catch (JSONException e) {
+                                            callbackContext.error(ERROR_INVALID_PARAMETERS);
+                                            return;
+                                        }
+                                        final SendMessageToWX.Req req = new SendMessageToWX.Req();
+                                        req.transaction = buildTransaction();
+                                        if (params.has(KEY_ARG_SCENE)) {
+                                            switch (params.getInt(KEY_ARG_SCENE)) {
+                                                case SCENE_FAVORITE:
+                                                    req.scene = SendMessageToWX.Req.WXSceneFavorite;
+                                                    break;
+                                                case SCENE_TIMELINE:
+                                                    req.scene = SendMessageToWX.Req.WXSceneTimeline;
+                                                    break;
+                                                case SCENE_SESSION:
+                                                    req.scene = SendMessageToWX.Req.WXSceneSession;
+                                                    break;
+                                                default:
+                                                    req.scene = SendMessageToWX.Req.WXSceneTimeline;
+                                            }
+                                        } else {
+                                            req.scene = SendMessageToWX.Req.WXSceneTimeline;
+                                        }
+                                        try {
+                                            req.message = buildSharingMessage(params);
+                                        } catch (JSONException e) {
+                                            Log.e(TAG, "Failed to build sharing message.", e);
+                                            // clear callback context
+                                            currentCallbackContext = null;
+                                            // send json exception error
+                                            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
+                                        }
+                                        if (api.sendReq(req)) {
+                                            Log.i(TAG, "Message has been sent successfully.");
+                                        } else {
+                                            Log.i(TAG, "Message has been sent unsuccessfully.");
+                                            // clear callback context
+                                            currentCallbackContext = null;
+                                            // send error
+                                            callbackContext.error(ERROR_SEND_REQUEST_FAILED);
+                                        }
+                                        // send no result
+                                        sendNoResultPluginResult(callbackContext);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
             }
         });
-
-        // send no result
-        sendNoResultPluginResult(callbackContext);
-
         return true;
     }
 
