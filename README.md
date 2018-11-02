@@ -1,15 +1,6 @@
-# cordova-plugin-jb-wechat
+# cordova-plugin-yun-wechat
 
-A cordova plugin, a JS version of Wechat SDK
-
-# Feature
-基于2.1.0版本的cordova-plugin-wechat插件修改，用于解决安卓中微信分享返回闪退问题
-
-这是cordova版本太高，不兼容这个插件所导致的。我是修改了$your_project/plugins/cordova-plugin-wechat/scripts/android-install.js中的
-var targetDir = path.join(projectRoot, "platforms", "android", "src", packageName.replace(/\./g, path.sep), "wxapi");
-
-修改为
-var targetDir = path.join(projectRoot, "platforms", "android", "app","src","main","java", packageName.replace(/\./g, path.sep), "wxapi"); 
+添加android动态权限
 
 # Install
 
@@ -130,19 +121,5 @@ Wechat.chooseInvoiceFromWX(data,function(data){
 # FAQ
 
 See [FAQ](https://github.com/xu-li/cordova-plugin-wechat/wiki/FAQ).
+See [FAQ](https://github.com/XiaoyuZheng666/WechatPlugin/wiki/FAQ).
 
-# TODO
-
-1. ~~Add android version~~
-
-2. ~~Share to wechat session(聊天) and wechat favorite(收藏)~~
-
-3. ~~Add other media types, including music etc.~~
-
-4. ~~Other APIs~~
-
-5. ~~Android Version update~~
-
-# LICENSE
-
-[MIT LICENSE](http://opensource.org/licenses/MIT)
