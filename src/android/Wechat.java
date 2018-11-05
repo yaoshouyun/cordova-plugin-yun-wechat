@@ -207,24 +207,36 @@ public class Wechat extends CordovaPlugin {
                                         } else {
                                             req.scene = SendMessageToWX.Req.WXSceneTimeline;
                                         }
-                                        try {
-                                            req.message = buildSharingMessage(params);
-                                        } catch (JSONException e) {
-                                            Log.e(TAG, "Failed to build sharing message.", e);
-                                            // clear callback context
-                                            currentCallbackContext = null;
-                                            // send json exception error
-                                            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
-                                        }
-                                        if (api.sendReq(req)) {
-                                            Log.i(TAG, "Message has been sent successfully.");
-                                        } else {
-                                            Log.i(TAG, "Message has been sent unsuccessfully.");
-                                            // clear callback context
-                                            currentCallbackContext = null;
-                                            // send error
-                                            callbackContext.error(ERROR_SEND_REQUEST_FAILED);
-                                        }
+                                        // run in background
+                                        cordova.getThreadPool().execute(new Runnable() {
+
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    req.message = buildSharingMessage(params);
+                                                } catch (JSONException e) {
+                                                    Log.e(TAG, "Failed to build sharing message.", e);
+
+                                                    // clear callback context
+                                                    currentCallbackContext = null;
+
+                                                    // send json exception error
+                                                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
+                                                }
+
+                                                if (api.sendReq(req)) {
+                                                    Log.i(TAG, "Message has been sent successfully.");
+                                                } else {
+                                                    Log.i(TAG, "Message has been sent unsuccessfully.");
+
+                                                    // clear callback context
+                                                    currentCallbackContext = null;
+
+                                                    // send error
+                                                    callbackContext.error(ERROR_SEND_REQUEST_FAILED);
+                                                }
+                                            }
+                                        });
                                         // send no result
                                         sendNoResultPluginResult(callbackContext);
                                     } catch (Exception e) {
